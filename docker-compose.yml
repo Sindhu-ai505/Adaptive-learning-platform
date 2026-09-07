@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+
+  # ── FastAPI backend ──────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: adaptivelearn_backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: "sqlite:////app/data/adaptive_learning.db"
+      ALLOWED_ORIGINS: "http://localhost,http://localhost:80,http://frontend"
+    volumes:
+      - db_data:/app/data
+    ports:
+      - "8000:8000"      # expose directly for local debugging / API docs
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ── React frontend (nginx) ───────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: /api       # browser talks to nginx, which proxies to backend
+    container_name: adaptivelearn_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  db_data:
+    driver: local

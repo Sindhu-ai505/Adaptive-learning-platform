@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { recommendationsApi, feedbackApi } from "../services/api";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import Recommendation from "../components/Recommendation";
 
 export default function Recommendations() {

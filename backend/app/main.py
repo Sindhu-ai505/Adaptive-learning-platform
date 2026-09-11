@@ -1,7 +1,11 @@
+import os
+from pathlib import Path
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from app.core.config import ALLOWED_ORIGINS
 from app.core.database import Base, engine, SessionLocal
@@ -71,11 +75,41 @@ app.include_router(ai.router,              prefix="/api/ai",              tags=[
 app.include_router(feedback.router,        prefix="/api/feedback",        tags=["AI Feedback"])
 
 
-@app.get("/")
-def root():
-    return {"message": "AdaptiveLearn AI API is running"}
-
-
 @app.get("/health")
 def health():
     return {"status": "healthy"}
+
+
+# ── Frontend Static Files (Single-service Fullstack Deployment) ─────────────
+_static_dir = None
+_candidates = [
+    Path(os.getenv("FRONTEND_DIST_DIR", "")),
+    Path(__file__).resolve().parent.parent.parent / "frontend" / "dist",
+    Path(__file__).resolve().parent.parent / "dist",
+    Path("/app/frontend/dist"),
+    Path("./frontend/dist"),
+    Path("./dist"),
+]
+
+for _p in _candidates:
+    if str(_p) and _p.is_dir() and (_p / "index.html").is_file():
+        _static_dir = _p
+        break
+
+if _static_dir:
+    _assets_dir = _static_dir / "assets"
+    if _assets_dir.is_dir():
+        app.mount("/assets", StaticFiles(directory=str(_assets_dir)), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        # Serve exact file if it exists (e.g. favicon.ico, vite.svg)
+        candidate = _static_dir / full_path
+        if full_path and candidate.is_file():
+            return FileResponse(str(candidate))
+        # Fallback to index.html for client-side routing (e.g. /dashboard, /courses)
+        return FileResponse(str(_static_dir / "index.html"))
+else:
+    @app.get("/")
+    def root():
+        return {"message": "AdaptiveLearn AI API is running"}

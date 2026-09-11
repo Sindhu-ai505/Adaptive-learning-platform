@@ -1,0 +1,14 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+node_modules
+dist
+.env
+data/
+ml/
+stremlit/
+tests/

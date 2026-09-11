@@ -11,6 +11,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
 DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./adaptive_learning.db")
 
 # Comma-separated list of allowed origins, e.g.
-# ALLOWED_ORIGINS=http://localhost:5173,https://myapp.com
-_raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173")
-ALLOWED_ORIGINS: list[str] = [o.strip() for o in _raw_origins.split(",")]
+# ALLOWED_ORIGINS=http://localhost:5173,https://myapp.onrender.com
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "*")
+if _raw_origins.strip() == "*":
+    ALLOWED_ORIGINS: list[str] = ["*"]
+else:
+    ALLOWED_ORIGINS: list[str] = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+

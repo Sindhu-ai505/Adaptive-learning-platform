@@ -1591,7 +1591,7 @@ def run_seed(db) -> None:
 
             db.commit()
             print(
-                f"       └─ '{lesson.title}' → quiz '{quiz.title}' "
+                f"       |-- '{lesson.title}' -> quiz '{quiz.title}' "
                 f"({len(l_data['questions'])} questions)"
             )
 

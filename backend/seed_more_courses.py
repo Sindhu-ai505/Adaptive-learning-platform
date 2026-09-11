@@ -1141,7 +1141,7 @@ def seed():
                 ))
                 total_questions += 1
             db.commit()
-            print(f"       └─ '{lesson.title}' → quiz id={quiz.id}, {len(l_data['questions'])} questions")
+            print(f"       |-- '{lesson.title}' -> quiz id={quiz.id}, {len(l_data['questions'])} questions")
 
     db.close()
     print()
